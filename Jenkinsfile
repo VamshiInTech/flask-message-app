@@ -2,48 +2,46 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "flask-message-app"
-        DOCKERHUB_USER = "vamshiintech"   // your dockerhub username
+        DOCKERHUB_USER = credentials('dockerhub-username')   // username only
+        DOCKERHUB_PASS = credentials('dockerhub-password')   // password only
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'github-ssh', url: 'git@github.com:VamshiInTech/flask-message-app.git'
+                git branch: 'main',
+                    credentialsId: 'github-ssh',
+                    url: 'git@github.com:VamshiInTech/flask-message-app.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:latest .'
-                }
+                sh 'docker build -t vamshiintech/flask-message-app:latest .'
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
-                script {
-                    sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin'
-                }
+                // This is the FIX
+                sh """
+                    echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
+                """
             }
         }
 
         stage('Push Image') {
             steps {
-                sh 'docker push $DOCKERHUB_USER/$IMAGE_NAME:latest'
+                sh 'docker push vamshiintech/flask-message-app:latest'
             }
         }
 
         stage('Deploy Container') {
             steps {
-                script {
-                    sh '''
+                sh """
                     docker rm -f flask-app || true
-                    docker run -d --name flask-app -p 5000:5000 $DOCKERHUB_USER/$IMAGE_NAME:latest
-                    '''
-                }
+                    docker run -d --name flask-app -p 5000:5000 vamshiintech/flask-message-app:latest
+                """
             }
         }
     }
