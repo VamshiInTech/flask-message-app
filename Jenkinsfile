@@ -17,7 +17,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t vamshiintech/flask-message-app:latest .'
+                sh 'docker build -t vamshi/flask-message-app:latest .'
             }
         }
 
@@ -32,7 +32,7 @@ pipeline {
 
         stage('Push Image') {
             steps {
-                sh 'docker push vamshiintech/flask-message-app:latest'
+                sh 'docker push vamshi/flask-message-app:latest'
             }
         }
 
