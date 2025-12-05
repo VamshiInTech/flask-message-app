@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = credentials('dockerhub-username')   // username only
-        DOCKERHUB_PASS = credentials('dockerhub-password')   // password only
+        DOCKERHUB_USER = credentials('dockerhub')
+        DOCKERHUB_PASS = credentials('dockerhub-pass')
     }
 
     stages {
@@ -23,7 +23,6 @@ pipeline {
 
         stage('Login to Docker Hub') {
             steps {
-                // This is the FIX
                 sh """
                     echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
                 """
@@ -40,7 +39,7 @@ pipeline {
             steps {
                 sh """
                     docker rm -f flask-app || true
-                    docker run -d --name flask-app -p 5000:5000 vamshiintech/flask-message-app:latest
+                    docker run -d --name flask-app -p 5000:5000 vamshi/flask-message-app:latest
                 """
             }
         }
