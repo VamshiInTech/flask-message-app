@@ -2,19 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDS = credentials('dockerhub')
+        DOCKER = credentials('dockerhub')
     }
 
     stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    credentialsId: 'github-ssh',
-                    url: 'git@github.com:VamshiInTech/flask-message-app.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t vamshi/flask-message-app:latest .'
@@ -24,7 +15,7 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 sh '''
-                    echo "$DOCKER_PSW" | docker login -u "$DOCKER_CREDS_USR" --password-stdin
+                    echo "$DOCKER_PSW" | docker login -u "$DOCKER_USR" --password-stdin
                 '''
             }
         }
@@ -32,15 +23,6 @@ pipeline {
         stage('Push Image') {
             steps {
                 sh 'docker push vamshi/flask-message-app:latest'
-            }
-        }
-
-        stage('Deploy Container') {
-            steps {
-                sh '''
-                    docker rm -f flask-app || true
-                    docker run -d --name flask-app -p 5000:5000 vamshi/flask-message-app:latest
-                '''
             }
         }
     }
