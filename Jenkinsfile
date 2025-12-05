@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = credentials('dockerhub')
-        DOCKERHUB_PASS = credentials('dockerhub-pass')
+        DOCKER_CREDS = credentials('dockerhub-creds')
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -23,9 +23,9 @@ pipeline {
 
         stage('Login to Docker Hub') {
             steps {
-                sh """
-                    echo "${DOCKERHUB_PASS}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
-                """
+                sh '''
+                    echo "$DOCKER_CREDS_PSW" | docker login -u "$DOCKER_CREDS_USR" --password-stdin
+                '''
             }
         }
 
@@ -37,10 +37,10 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                sh """
+                sh '''
                     docker rm -f flask-app || true
                     docker run -d --name flask-app -p 5000:5000 vamshi/flask-message-app:latest
-                """
+                '''
             }
         }
     }
